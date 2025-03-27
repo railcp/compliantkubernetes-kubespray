@@ -17,6 +17,7 @@ tolerations: {{- toYaml . | nindent 2 }}
 
 csi:
   enableCephfsDriver: false
+  enableCSIHostNetwork: {{ .Values | get "csi.enableCSIHostNetwork" true }}
 
   csiRBDProvisionerResource: |
     {{- range $name, $config := omit .Values.provisioner "tolerations" }}
