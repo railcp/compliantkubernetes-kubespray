@@ -1,5 +1,7 @@
 # Values shared with all clusters
 commons:
+  csi:
+    enableCSIHostNetwork: true
   podSecurityPolicies:
     # Requires Gatekeeper PodSecurityPolicies templates from apps!
     # Enable after apps is installed!
@@ -194,3 +196,6 @@ clusters:
     networkPolicies:
       apiserverPeers: []
       nodePeers: []
+    csi:
+      # whether the rbdplugin and cephfsplugin should run on the CNI or hostNetwork
+      enableCSIHostNetwork: true

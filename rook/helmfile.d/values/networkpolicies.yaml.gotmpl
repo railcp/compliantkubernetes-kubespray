@@ -1,4 +1,5 @@
 {{- $netpol := .Values.networkPolicies }}
+{{- $enableCSIHostNetwork := dig "csi" "enableCSIHostNetwork" true (.Values | merge dict) }}
 
 rules:
   egress-rule-dns:
@@ -93,6 +94,15 @@ policies:
         - rule: egress-rule-mon
         - rule: egress-rule-osd
 
+    csi-rbdplugin:
+      podSelectorLabels:
+        app: csi-rbdplugin
+      egress:
+        #- rule: egress-rule-apiserver
+        - rule: egress-rule-mgr
+        - rule: egress-rule-mon
+        - rule: egress-rule-osd
+
     detect-version:
       podSelectorLabels:
         app: rook-ceph-detect-version
@@ -116,12 +126,16 @@ policies:
                 kubernetes.io/metadata.name: monitoring
               podSelectorLabels:
                 app.kubernetes.io/name: prometheus
+        {{- if $enableCSIHostNetwork }}
         - rule: peers-rule-nodes
           ports:
             - tcp: 6800
+        {{- end }}
         - peers:
             - podSelectorLabels:
                 app: csi-rbdplugin-provisioner
+            - podSelectorLabels:
+                app: csi-rbdplugin
             - podSelectorLabels:
                 app: rook-ceph-operator
             - podSelectorLabels:
@@ -144,13 +158,17 @@ policies:
         - rule: egress-rule-mon
         - rule: egress-rule-osd
       ingress:
+        {{- if $enableCSIHostNetwork }}
         - rule: peers-rule-nodes
           ports:
             - tcp: 3300
             - tcp: 6789
+        {{- end }}
         - peers:
             - podSelectorLabels:
                 app: csi-rbdplugin-provisioner
+            - podSelectorLabels:
+                app: csi-rbdplugin
             - podSelectorLabels:
                 app: rook-ceph-operator
             - podSelectorLabels:
@@ -185,6 +203,8 @@ policies:
             - tcp: 6800
               end: 7300
         - peers:
+            - podSelectorLabels:
+                app: csi-rbdplugin
             - podSelectorLabels:
                 app: csi-rbdplugin-provisioner
             - podSelectorLabels:
